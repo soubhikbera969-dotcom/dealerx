@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
+import { AIChatDrawer } from "@/components/AIChatDrawer";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
 
@@ -29,6 +30,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
           </header>
           <main className="flex-1 p-6 overflow-auto">{children}</main>
         </div>
+        <AIChatDrawer />
       </div>
     </SidebarProvider>
   );
