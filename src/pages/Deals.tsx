@@ -8,9 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-import { Plus, GripVertical } from "lucide-react";
+import { Plus, GripVertical, MoreVertical, Pencil, Trash2 } from "lucide-react";
 import type { Tables, Database } from "@/integrations/supabase/types";
 
 type Deal = Tables<"deals">;
@@ -26,12 +27,15 @@ const COLUMNS: { status: DealStatus; label: string; color: string }[] = [
 
 export default function Deals() {
   const { workspaceId } = useAuth();
-  const { formatValue, currency, toUSD, symbol } = useCurrency();
+  const { formatValue, currency, toUSD, symbol, rates } = useCurrency();
   const [deals, setDeals] = useState<Deal[]>([]);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editDeal, setEditDeal] = useState<Deal | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [form, setForm] = useState({ title: "", contact_id: "", value: "", status: "lead" as DealStatus });
   const [dragDeal, setDragDeal] = useState<Deal | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<Deal | null>(null);
 
   const fetchData = useCallback(async () => {
     if (!workspaceId) return;
@@ -44,6 +48,8 @@ export default function Deals() {
   }, [workspaceId]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  const resetForm = () => setForm({ title: "", contact_id: "", value: "", status: "lead" });
 
   const handleCreate = async () => {
     if (!workspaceId || !form.title.trim()) {
@@ -58,7 +64,47 @@ export default function Deals() {
       status: form.status,
     });
     if (error) toast.error(error.message);
-    else { toast.success("Deal created"); setDialogOpen(false); fetchData(); }
+    else { toast.success("Deal created"); setDialogOpen(false); resetForm(); fetchData(); }
+  };
+
+  const openEdit = (deal: Deal) => {
+    const localValue = deal.value ? (Number(deal.value) * rates[currency]).toFixed(2) : "";
+    setEditDeal(deal);
+    setForm({
+      title: deal.title,
+      contact_id: deal.contact_id || "",
+      value: localValue,
+      status: deal.status,
+    });
+    setEditDialogOpen(true);
+  };
+
+  const handleUpdate = async () => {
+    if (!editDeal || !form.title.trim()) {
+      toast.error("Title is required");
+      return;
+    }
+    const { error } = await supabase.from("deals").update({
+      title: form.title,
+      contact_id: form.contact_id || null,
+      value: form.value ? toUSD(parseFloat(form.value)) : null,
+      status: form.status,
+    }).eq("id", editDeal.id);
+    if (error) toast.error(error.message);
+    else {
+      toast.success("Deal updated");
+      setEditDialogOpen(false);
+      setEditDeal(null);
+      resetForm();
+      fetchData();
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteConfirm) return;
+    const { error } = await supabase.from("deals").delete().eq("id", deleteConfirm.id);
+    if (error) toast.error(error.message);
+    else { toast.success("Deal deleted"); setDeleteConfirm(null); fetchData(); }
   };
 
   const handleDrop = async (status: DealStatus) => {
@@ -77,44 +123,48 @@ export default function Deals() {
     return contacts.find((c) => c.id === id)?.name || null;
   };
 
+  const DealForm = ({ onSubmit, submitLabel }: { onSubmit: () => void; submitLabel: string }) => (
+    <div className="space-y-4">
+      <div><Label>Title *</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
+      <div>
+        <Label>Contact</Label>
+        <Select value={form.contact_id} onValueChange={(v) => setForm({ ...form, contact_id: v })}>
+          <SelectTrigger><SelectValue placeholder="Select contact" /></SelectTrigger>
+          <SelectContent>
+            {contacts.map((c) => (
+              <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div><Label>Value ({symbol})</Label><Input type="number" value={form.value} onChange={(e) => setForm({ ...form, value: e.target.value })} placeholder={`Enter amount in ${currency}`} /></div>
+      <div>
+        <Label>Status</Label>
+        <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as DealStatus })}>
+          <SelectTrigger><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {COLUMNS.map((col) => (
+              <SelectItem key={col.status} value={col.status}>{col.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <Button className="w-full" onClick={onSubmit}>{submitLabel}</Button>
+    </div>
+  );
+
   return (
     <DashboardLayout>
       <div className="space-y-6 animate-fade-in">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-foreground">Deal Pipeline</h1>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
             <DialogTrigger asChild>
               <Button><Plus className="h-4 w-4 mr-1" /> New Deal</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader><DialogTitle>Create Deal</DialogTitle></DialogHeader>
-              <div className="space-y-4">
-                <div><Label>Title *</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
-                <div>
-                  <Label>Contact</Label>
-                  <Select value={form.contact_id} onValueChange={(v) => setForm({ ...form, contact_id: v })}>
-                    <SelectTrigger><SelectValue placeholder="Select contact" /></SelectTrigger>
-                    <SelectContent>
-                      {contacts.map((c) => (
-                        <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div><Label>Value ({symbol})</Label><Input type="number" value={form.value} onChange={(e) => setForm({ ...form, value: e.target.value })} placeholder={`Enter amount in ${currency}`} /></div>
-                <div>
-                  <Label>Status</Label>
-                  <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as DealStatus })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {COLUMNS.map((col) => (
-                        <SelectItem key={col.status} value={col.status}>{col.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button className="w-full" onClick={handleCreate}>Create Deal</Button>
-              </div>
+              <DealForm onSubmit={handleCreate} submitLabel="Create Deal" />
             </DialogContent>
           </Dialog>
         </div>
@@ -142,12 +192,12 @@ export default function Deals() {
                       draggable
                       onDragStart={() => setDragDeal(deal)}
                       onDragEnd={() => setDragDeal(null)}
-                      className="cursor-grab active:cursor-grabbing glass-card hover:shadow-lg transition-all hover:-translate-y-0.5"
+                      className="cursor-grab active:cursor-grabbing glass-card hover:shadow-lg transition-all hover:-translate-y-0.5 group"
                     >
                       <CardContent className="p-3">
                         <div className="flex items-start gap-2">
                           <GripVertical className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-                          <div className="min-w-0">
+                          <div className="min-w-0 flex-1">
                             <p className="font-medium text-sm text-foreground truncate">{deal.title}</p>
                             {getContactName(deal.contact_id) && (
                               <p className="text-xs text-muted-foreground mt-1">{getContactName(deal.contact_id)}</p>
@@ -156,6 +206,21 @@ export default function Deals() {
                               <p className="text-xs font-semibold text-primary mt-1">{formatValue(Number(deal.value))}</p>
                             )}
                           </div>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                                <MoreVertical className="h-3.5 w-3.5" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => openEdit(deal)}>
+                                <Pencil className="h-3.5 w-3.5 mr-2" /> Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem className="text-destructive" onClick={() => setDeleteConfirm(deal)}>
+                                <Trash2 className="h-3.5 w-3.5 mr-2" /> Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </CardContent>
                     </Card>
@@ -164,6 +229,28 @@ export default function Deals() {
             </div>
           ))}
         </div>
+
+        {/* Edit Dialog */}
+        <Dialog open={editDialogOpen} onOpenChange={(open) => { setEditDialogOpen(open); if (!open) { setEditDeal(null); resetForm(); } }}>
+          <DialogContent>
+            <DialogHeader><DialogTitle>Edit Deal</DialogTitle></DialogHeader>
+            <DealForm onSubmit={handleUpdate} submitLabel="Save Changes" />
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={!!deleteConfirm} onOpenChange={(open) => { if (!open) setDeleteConfirm(null); }}>
+          <DialogContent>
+            <DialogHeader><DialogTitle>Delete Deal</DialogTitle></DialogHeader>
+            <p className="text-sm text-muted-foreground">
+              Are you sure you want to delete <span className="font-semibold text-foreground">"{deleteConfirm?.title}"</span>? This action cannot be undone.
+            </p>
+            <div className="flex gap-2 justify-end mt-4">
+              <Button variant="outline" onClick={() => setDeleteConfirm(null)}>Cancel</Button>
+              <Button variant="destructive" onClick={handleDelete}>Delete</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </DashboardLayout>
   );
