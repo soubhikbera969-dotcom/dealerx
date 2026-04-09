@@ -7,6 +7,8 @@ interface CurrencyContextType {
   setCurrency: (c: CurrencyCode) => void;
   rates: Record<CurrencyCode, number>;
   formatValue: (usdValue: number | null | undefined) => string;
+  toUSD: (localValue: number) => number;
+  symbol: string;
   loading: boolean;
 }
 
@@ -18,6 +20,8 @@ const CurrencyContext = createContext<CurrencyContextType>({
   setCurrency: () => {},
   rates: { USD: 1, EUR: 0.92, INR: 83.5 },
   formatValue: () => "",
+  toUSD: (v) => v,
+  symbol: "$",
   loading: false,
 });
 
