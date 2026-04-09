@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,7 @@ const COLUMNS: { status: DealStatus; label: string; color: string }[] = [
 
 export default function Deals() {
   const { workspaceId } = useAuth();
+  const { formatValue, currency } = useCurrency();
   const [deals, setDeals] = useState<Deal[]>([]);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -99,7 +101,7 @@ export default function Deals() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div><Label>Value ($)</Label><Input type="number" value={form.value} onChange={(e) => setForm({ ...form, value: e.target.value })} /></div>
+                <div><Label>Value ({currency})</Label><Input type="number" value={form.value} onChange={(e) => setForm({ ...form, value: e.target.value })} /></div>
                 <div>
                   <Label>Status</Label>
                   <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as DealStatus })}>
@@ -151,7 +153,7 @@ export default function Deals() {
                               <p className="text-xs text-muted-foreground mt-1">{getContactName(deal.contact_id)}</p>
                             )}
                             {deal.value && (
-                              <p className="text-xs font-semibold text-primary mt-1">${Number(deal.value).toLocaleString()}</p>
+                              <p className="text-xs font-semibold text-primary mt-1">{formatValue(Number(deal.value))}</p>
                             )}
                           </div>
                         </div>
