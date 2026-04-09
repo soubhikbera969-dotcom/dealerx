@@ -26,7 +26,7 @@ const COLUMNS: { status: DealStatus; label: string; color: string }[] = [
 
 export default function Deals() {
   const { workspaceId } = useAuth();
-  const { formatValue, currency } = useCurrency();
+  const { formatValue, currency, toUSD, symbol } = useCurrency();
   const [deals, setDeals] = useState<Deal[]>([]);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -54,7 +54,7 @@ export default function Deals() {
       title: form.title,
       workspace_id: workspaceId,
       contact_id: form.contact_id || null,
-      value: form.value ? parseFloat(form.value) : null,
+      value: form.value ? toUSD(parseFloat(form.value)) : null,
       status: form.status,
     });
     if (error) toast.error(error.message);
@@ -101,7 +101,7 @@ export default function Deals() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div><Label>Value ({currency})</Label><Input type="number" value={form.value} onChange={(e) => setForm({ ...form, value: e.target.value })} /></div>
+                <div><Label>Value ({symbol})</Label><Input type="number" value={form.value} onChange={(e) => setForm({ ...form, value: e.target.value })} placeholder={`Enter amount in ${currency}`} /></div>
                 <div>
                   <Label>Status</Label>
                   <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as DealStatus })}>

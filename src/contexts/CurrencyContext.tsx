@@ -75,8 +75,18 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     [currency, rates]
   );
 
+  const toUSD = useCallback(
+    (localValue: number): number => {
+      if (rates[currency] === 0) return localValue;
+      return localValue / rates[currency];
+    },
+    [currency, rates]
+  );
+
+  const symbol = SYMBOLS[currency];
+
   return (
-    <CurrencyContext.Provider value={{ currency, setCurrency, rates, formatValue, loading }}>
+    <CurrencyContext.Provider value={{ currency, setCurrency, rates, formatValue, toUSD, symbol, loading }}>
       {children}
     </CurrencyContext.Provider>
   );
