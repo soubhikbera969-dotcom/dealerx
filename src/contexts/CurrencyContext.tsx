@@ -7,6 +7,8 @@ interface CurrencyContextType {
   setCurrency: (c: CurrencyCode) => void;
   rates: Record<CurrencyCode, number>;
   formatValue: (usdValue: number | null | undefined) => string;
+  toUSD: (localValue: number) => number;
+  symbol: string;
   loading: boolean;
 }
 
@@ -18,6 +20,8 @@ const CurrencyContext = createContext<CurrencyContextType>({
   setCurrency: () => {},
   rates: { USD: 1, EUR: 0.92, INR: 83.5 },
   formatValue: () => "",
+  toUSD: (v) => v,
+  symbol: "$",
   loading: false,
 });
 
@@ -71,8 +75,18 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     [currency, rates]
   );
 
+  const toUSD = useCallback(
+    (localValue: number): number => {
+      if (rates[currency] === 0) return localValue;
+      return localValue / rates[currency];
+    },
+    [currency, rates]
+  );
+
+  const symbol = SYMBOLS[currency];
+
   return (
-    <CurrencyContext.Provider value={{ currency, setCurrency, rates, formatValue, loading }}>
+    <CurrencyContext.Provider value={{ currency, setCurrency, rates, formatValue, toUSD, symbol, loading }}>
       {children}
     </CurrencyContext.Provider>
   );
