@@ -1,8 +1,10 @@
-import { LayoutDashboard, Users, Handshake, LogOut, Sun, Moon } from "lucide-react";
+import { LayoutDashboard, Users, Handshake, LogOut, Sun, Moon, DollarSign } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useCurrency, CurrencyCode } from "@/contexts/CurrencyContext";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Sidebar,
   SidebarContent,
@@ -29,6 +31,13 @@ export function AppSidebar() {
   const location = useLocation();
   const { signOut, workspaceName } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { currency, setCurrency } = useCurrency();
+
+  const CURRENCY_OPTIONS: { value: CurrencyCode; label: string; symbol: string }[] = [
+    { value: "USD", label: "USD ($)", symbol: "$" },
+    { value: "EUR", label: "EUR (€)", symbol: "€" },
+    { value: "INR", label: "INR (₹)", symbol: "₹" },
+  ];
 
   return (
     <Sidebar collapsible="icon">
@@ -59,6 +68,32 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="space-y-2 p-2">
+        {!collapsed ? (
+          <Select value={currency} onValueChange={(v) => setCurrency(v as CurrencyCode)}>
+            <SelectTrigger className="w-full h-9 text-sm">
+              <DollarSign className="h-4 w-4 mr-1 shrink-0" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {CURRENCY_OPTIONS.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        ) : (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              const next = CURRENCY_OPTIONS[(CURRENCY_OPTIONS.findIndex(o => o.value === currency) + 1) % 3];
+              setCurrency(next.value);
+            }}
+            className="w-full"
+            title={currency}
+          >
+            <span className="text-sm font-semibold">{CURRENCY_OPTIONS.find(o => o.value === currency)?.symbol}</span>
+          </Button>
+        )}
         <Button
           variant="ghost"
           size={collapsed ? "icon" : "default"}
