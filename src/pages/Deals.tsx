@@ -123,7 +123,7 @@ export default function Deals() {
     return contacts.find((c) => c.id === id)?.name || null;
   };
 
-  const DealForm = ({ onSubmit, submitLabel }: { onSubmit: () => void; submitLabel: string }) => (
+  const renderDealForm = (onSubmit: () => void, submitLabel: string) => (
     <div className="space-y-4">
       <div><Label>Title *</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
       <div>
@@ -164,7 +164,7 @@ export default function Deals() {
             </DialogTrigger>
             <DialogContent>
               <DialogHeader><DialogTitle>Create Deal</DialogTitle></DialogHeader>
-              <DealForm onSubmit={handleCreate} submitLabel="Create Deal" />
+              {renderDealForm(handleCreate, "Create Deal")}
             </DialogContent>
           </Dialog>
         </div>
@@ -234,7 +234,7 @@ export default function Deals() {
         <Dialog open={editDialogOpen} onOpenChange={(open) => { setEditDialogOpen(open); if (!open) { setEditDeal(null); resetForm(); } }}>
           <DialogContent>
             <DialogHeader><DialogTitle>Edit Deal</DialogTitle></DialogHeader>
-            <DealForm onSubmit={handleUpdate} submitLabel="Save Changes" />
+            {renderDealForm(handleUpdate, "Save Changes")}
           </DialogContent>
         </Dialog>
 
