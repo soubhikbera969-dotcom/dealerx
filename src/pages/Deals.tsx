@@ -123,7 +123,7 @@ export default function Deals() {
     return contacts.find((c) => c.id === id)?.name || null;
   };
 
-  const DealForm = ({ onSubmit, submitLabel }: { onSubmit: () => void; submitLabel: string }) => (
+  const renderDealForm = (onSubmit: () => void, submitLabel: string) => (
     <div className="space-y-4">
       <div><Label>Title *</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
       <div>
