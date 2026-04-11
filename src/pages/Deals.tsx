@@ -38,7 +38,7 @@ export default function Deals() {
   const [form, setForm] = useState({ title: "", contact_id: "", value: "", status: "lead" as DealStatus });
   const [dragDeal, setDragDeal] = useState<Deal | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<Deal | null>(null);
-
+  const [historyDeal, setHistoryDeal] = useState<Deal | null>(null);
   const fetchData = useCallback(async () => {
     if (!workspaceId) return;
     const [dealsRes, contactsRes] = await Promise.all([
