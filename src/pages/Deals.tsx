@@ -164,7 +164,7 @@ export default function Deals() {
             </DialogTrigger>
             <DialogContent>
               <DialogHeader><DialogTitle>Create Deal</DialogTitle></DialogHeader>
-              <DealForm onSubmit={handleCreate} submitLabel="Create Deal" />
+              {renderDealForm(handleCreate, "Create Deal")}
             </DialogContent>
           </Dialog>
         </div>
@@ -234,7 +234,7 @@ export default function Deals() {
         <Dialog open={editDialogOpen} onOpenChange={(open) => { setEditDialogOpen(open); if (!open) { setEditDeal(null); resetForm(); } }}>
           <DialogContent>
             <DialogHeader><DialogTitle>Edit Deal</DialogTitle></DialogHeader>
-            <DealForm onSubmit={handleUpdate} submitLabel="Save Changes" />
+            {renderDealForm(handleUpdate, "Save Changes")}
           </DialogContent>
         </Dialog>
 
