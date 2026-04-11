@@ -11,7 +11,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-import { Plus, GripVertical, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { Plus, GripVertical, MoreVertical, Pencil, Trash2, History } from "lucide-react";
+import { format } from "date-fns";
+import { DealHistoryDialog } from "@/components/DealHistoryDialog";
 import type { Tables, Database } from "@/integrations/supabase/types";
 
 type Deal = Tables<"deals">;
@@ -36,7 +38,7 @@ export default function Deals() {
   const [form, setForm] = useState({ title: "", contact_id: "", value: "", status: "lead" as DealStatus });
   const [dragDeal, setDragDeal] = useState<Deal | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<Deal | null>(null);
-
+  const [historyDeal, setHistoryDeal] = useState<Deal | null>(null);
   const fetchData = useCallback(async () => {
     if (!workspaceId) return;
     const [dealsRes, contactsRes] = await Promise.all([
@@ -205,6 +207,14 @@ export default function Deals() {
                             {deal.value && (
                               <p className="text-xs font-semibold text-primary mt-1">{formatValue(Number(deal.value))}</p>
                             )}
+                            <p className="text-[10px] text-muted-foreground/60 mt-1">
+                              Created: {format(new Date(deal.created_at), "MMM d, yyyy h:mm a")}
+                            </p>
+                            {deal.updated_at !== deal.created_at && (
+                              <p className="text-[10px] text-muted-foreground/60">
+                                Modified: {format(new Date(deal.updated_at), "MMM d, yyyy h:mm a")}
+                              </p>
+                            )}
                           </div>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -215,6 +225,9 @@ export default function Deals() {
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem onClick={() => openEdit(deal)}>
                                 <Pencil className="h-3.5 w-3.5 mr-2" /> Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => setHistoryDeal(deal)}>
+                                <History className="h-3.5 w-3.5 mr-2" /> History
                               </DropdownMenuItem>
                               <DropdownMenuItem className="text-destructive" onClick={() => setDeleteConfirm(deal)}>
                                 <Trash2 className="h-3.5 w-3.5 mr-2" /> Delete
@@ -251,6 +264,15 @@ export default function Deals() {
             </div>
           </DialogContent>
         </Dialog>
+        {/* Deal History Dialog */}
+        {historyDeal && (
+          <DealHistoryDialog
+            dealId={historyDeal.id}
+            dealTitle={historyDeal.title}
+            open={!!historyDeal}
+            onOpenChange={(open) => { if (!open) setHistoryDeal(null); }}
+          />
+        )}
       </div>
     </DashboardLayout>
   );
