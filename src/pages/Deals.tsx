@@ -27,7 +27,7 @@ const COLUMNS: { status: DealStatus; label: string; color: string }[] = [
 
 export default function Deals() {
   const { workspaceId } = useAuth();
-  const { formatValue, currency, symbol } = useCurrency();
+  const { formatValue, currency, symbol, toUSD, rates } = useCurrency();
   const [deals, setDeals] = useState<Deal[]>([]);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -60,7 +60,7 @@ export default function Deals() {
       title: form.title,
       workspace_id: workspaceId,
       contact_id: form.contact_id || null,
-      value: form.value ? parseFloat(form.value) : null,
+      value: form.value ? toUSD(parseFloat(form.value)) : null,
       status: form.status,
     });
     if (error) toast.error(error.message);
@@ -68,7 +68,7 @@ export default function Deals() {
   };
 
   const openEdit = (deal: Deal) => {
-    const localValue = deal.value ? String(Number(deal.value)) : "";
+    const localValue = deal.value ? String(Math.round(Number(deal.value) * rates[currency] * 100) / 100) : "";
     setEditDeal(deal);
     setForm({
       title: deal.title,
@@ -87,7 +87,7 @@ export default function Deals() {
     const { error } = await supabase.from("deals").update({
       title: form.title,
       contact_id: form.contact_id || null,
-      value: form.value ? parseFloat(form.value) : null,
+      value: form.value ? toUSD(parseFloat(form.value)) : null,
       status: form.status,
     }).eq("id", editDeal.id);
     if (error) toast.error(error.message);
