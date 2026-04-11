@@ -264,6 +264,15 @@ export default function Deals() {
             </div>
           </DialogContent>
         </Dialog>
+        {/* Deal History Dialog */}
+        {historyDeal && (
+          <DealHistoryDialog
+            dealId={historyDeal.id}
+            dealTitle={historyDeal.title}
+            open={!!historyDeal}
+            onOpenChange={(open) => { if (!open) setHistoryDeal(null); }}
+          />
+        )}
       </div>
     </DashboardLayout>
   );
