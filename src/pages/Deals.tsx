@@ -207,6 +207,14 @@ export default function Deals() {
                             {deal.value && (
                               <p className="text-xs font-semibold text-primary mt-1">{formatValue(Number(deal.value))}</p>
                             )}
+                            <p className="text-[10px] text-muted-foreground/60 mt-1">
+                              Created: {format(new Date(deal.created_at), "MMM d, yyyy h:mm a")}
+                            </p>
+                            {deal.updated_at !== deal.created_at && (
+                              <p className="text-[10px] text-muted-foreground/60">
+                                Modified: {format(new Date(deal.updated_at), "MMM d, yyyy h:mm a")}
+                              </p>
+                            )}
                           </div>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -217,6 +225,9 @@ export default function Deals() {
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem onClick={() => openEdit(deal)}>
                                 <Pencil className="h-3.5 w-3.5 mr-2" /> Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => setHistoryDeal(deal)}>
+                                <History className="h-3.5 w-3.5 mr-2" /> History
                               </DropdownMenuItem>
                               <DropdownMenuItem className="text-destructive" onClick={() => setDeleteConfirm(deal)}>
                                 <Trash2 className="h-3.5 w-3.5 mr-2" /> Delete
