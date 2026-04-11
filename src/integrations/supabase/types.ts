@@ -55,6 +55,36 @@ export type Database = {
           },
         ]
       }
+      deal_audit_log: {
+        Row: {
+          action: string
+          changed_by: string | null
+          changes: Json | null
+          created_at: string
+          deal_id: string
+          id: string
+          workspace_id: string
+        }
+        Insert: {
+          action: string
+          changed_by?: string | null
+          changes?: Json | null
+          created_at?: string
+          deal_id: string
+          id?: string
+          workspace_id: string
+        }
+        Update: {
+          action?: string
+          changed_by?: string | null
+          changes?: Json | null
+          created_at?: string
+          deal_id?: string
+          id?: string
+          workspace_id?: string
+        }
+        Relationships: []
+      }
       deals: {
         Row: {
           contact_id: string | null
