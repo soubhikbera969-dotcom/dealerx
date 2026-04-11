@@ -11,7 +11,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-import { Plus, GripVertical, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { Plus, GripVertical, MoreVertical, Pencil, Trash2, History } from "lucide-react";
+import { format } from "date-fns";
+import { DealHistoryDialog } from "@/components/DealHistoryDialog";
 import type { Tables, Database } from "@/integrations/supabase/types";
 
 type Deal = Tables<"deals">;
