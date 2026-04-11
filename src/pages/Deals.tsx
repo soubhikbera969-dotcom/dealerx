@@ -27,7 +27,7 @@ const COLUMNS: { status: DealStatus; label: string; color: string }[] = [
 
 export default function Deals() {
   const { workspaceId } = useAuth();
-  const { formatValue, currency, symbol } = useCurrency();
+  const { formatValue, currency, symbol, toUSD, rates } = useCurrency();
   const [deals, setDeals] = useState<Deal[]>([]);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);

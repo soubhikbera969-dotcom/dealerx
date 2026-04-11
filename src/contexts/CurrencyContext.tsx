@@ -64,14 +64,15 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const formatValue = useCallback(
-    (value: number | null | undefined): string => {
-      if (value == null) return "";
-      return `${SYMBOLS[currency]}${value.toLocaleString(LOCALES[currency], {
+    (usdValue: number | null | undefined): string => {
+      if (usdValue == null) return "";
+      const converted = usdValue * rates[currency];
+      return `${SYMBOLS[currency]}${converted.toLocaleString(LOCALES[currency], {
         minimumFractionDigits: 0,
         maximumFractionDigits: 2,
       })}`;
     },
-    [currency]
+    [currency, rates]
   );
 
   const toUSD = useCallback(
