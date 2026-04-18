@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ThemeColorPicker } from "@/components/ThemeColorPicker";
 
 const navItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
@@ -142,6 +143,7 @@ export function AppSidebar() {
           {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
           {!collapsed && <span className="ml-2">{theme === "light" ? "Dark mode" : "Light mode"}</span>}
         </Button>
+        <ThemeColorPicker collapsed={collapsed} />
         <Button
           variant="ghost"
           size={collapsed ? "icon" : "default"}
