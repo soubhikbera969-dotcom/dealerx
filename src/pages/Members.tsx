@@ -172,9 +172,11 @@ export default function Members() {
   };
 
   const updateMemberField = async (memberId: string, field: "designation" | "salary", value: string) => {
-    const payload: Record<string, unknown> =
-      field === "salary" ? { salary: value === "" ? null : Number(value) } : { designation: value || null };
-    const { error } = await supabase.from("workspace_members").update(payload).eq("id", memberId);
+    const payload =
+      field === "salary"
+        ? { salary: value === "" ? null : Number(value) }
+        : { designation: value || null };
+    const { error } = await supabase.from("workspace_members").update(payload as never).eq("id", memberId);
     if (error) return toast.error(error.message);
     toast.success("Updated");
     loadData();
