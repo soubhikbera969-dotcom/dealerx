@@ -12,6 +12,9 @@ import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import Contacts from "./pages/Contacts";
 import Deals from "./pages/Deals";
+import Members from "./pages/Members";
+import WorkspaceSettings from "./pages/WorkspaceSettings";
+import AcceptInvite from "./pages/AcceptInvite";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +35,10 @@ const App = () => (
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/contacts" element={<Contacts />} />
               <Route path="/deals" element={<Deals />} />
+              <Route path="/members" element={<Members />} />
+              <Route path="/settings/workspace" element={<WorkspaceSettings />} />
+              <Route path="/invite/:token" element={<AcceptInvite mode="invite" />} />
+              <Route path="/join/:token" element={<AcceptInvite mode="join" />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
