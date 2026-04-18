@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, Handshake, LogOut, Sun, Moon, DollarSign } from "lucide-react";
+import { LayoutDashboard, Users, Handshake, LogOut, Sun, Moon, DollarSign, Settings, UserCog } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -18,11 +18,17 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const navItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Contacts", url: "/contacts", icon: Users },
   { title: "Deals", url: "/deals", icon: Handshake },
+];
+
+const adminItems = [
+  { title: "Members", url: "/members", icon: UserCog },
+  { title: "Workspace", url: "/settings/workspace", icon: Settings },
 ];
 
 export function AppSidebar() {
