@@ -2,6 +2,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Link, Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { BentoGrid, type BentoItem } from "@/components/ui/bento-grid";
+import { HeroGeometric } from "@/components/ui/shape-landing-hero";
 import {
   Handshake,
   Users,
