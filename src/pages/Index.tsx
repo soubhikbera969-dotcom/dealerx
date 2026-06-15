@@ -1,7 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { BentoGrid, type BentoItem } from "@/components/ui/bento-grid";
 import {
   Handshake,
   Users,
@@ -11,38 +11,78 @@ import {
   MessageSquare,
   ArrowRight,
   CheckCircle2,
+  Palette,
+  Mail,
+  DollarSign,
 } from "lucide-react";
 
-const features = [
+const bentoFeatures: BentoItem[] = [
   {
-    icon: LayoutDashboard,
     title: "Pipeline Dashboard",
-    description: "Track your deals across 7-day, monthly, yearly and lifetime views.",
+    meta: "7d · 30d · 1y",
+    description:
+      "Visualise deal flow across time ranges with live revenue, win-rate and growth metrics.",
+    icon: <LayoutDashboard className="w-4 h-4 text-primary" />,
+    status: "Live",
+    tags: ["Analytics", "Reports"],
+    colSpan: 2,
+    hasPersistentHover: true,
   },
   {
-    icon: Handshake,
     title: "Deal Management",
-    description: "Create, update and audit every deal with full modification history.",
+    meta: "Full history",
+    description: "Create, update and audit every deal with complete change tracking.",
+    icon: <Handshake className="w-4 h-4 text-emerald-500" />,
+    status: "Core",
+    tags: ["Deals", "Audit"],
   },
   {
-    icon: Users,
     title: "Contacts & Teams",
-    description: "Organise customers and invite teammates with role-based access.",
+    meta: "Role-based",
+    description:
+      "Organise customers and invite teammates with Super Admin, Admin, Manager, Employee and Intern roles.",
+    icon: <Users className="w-4 h-4 text-purple-500" />,
+    tags: ["CRM", "Roles"],
+    colSpan: 2,
   },
   {
-    icon: ShieldCheck,
-    title: "Roles & Permissions",
-    description: "Super Admin, Admin, Manager, Employee and Intern levels built in.",
-  },
-  {
-    icon: MessageSquare,
     title: "AI Assistant",
+    meta: "Built-in",
     description: "Ask questions about your CRM data and get instant answers.",
+    icon: <MessageSquare className="w-4 h-4 text-sky-500" />,
+    status: "New",
+    tags: ["AI", "Chat"],
   },
   {
-    icon: Sparkles,
+    title: "Workspace Invites",
+    meta: "Token links",
+    description: "Send secure email invites so teammates join only your workspace.",
+    icon: <Mail className="w-4 h-4 text-amber-500" />,
+    status: "Secure",
+    tags: ["Invites", "Auth"],
+  },
+  {
     title: "Custom Themes",
-    description: "Pick your accent color and switch light or dark mode anytime.",
+    meta: "6 palettes",
+    description: "Pick an accent color and switch light or dark mode anytime.",
+    icon: <Palette className="w-4 h-4 text-rose-500" />,
+    tags: ["Theme", "UI"],
+  },
+  {
+    title: "Multi-Currency",
+    meta: "USD · EUR · INR",
+    description: "Track revenue in your preferred currency with live exchange rates.",
+    icon: <DollarSign className="w-4 h-4 text-green-500" />,
+    status: "Global",
+    tags: ["Finance"],
+  },
+  {
+    title: "Permissions & Security",
+    meta: "RLS protected",
+    description: "Row-level security keeps every workspace private and isolated.",
+    icon: <ShieldCheck className="w-4 h-4 text-indigo-500" />,
+    tags: ["Security"],
+    colSpan: 2,
   },
 ];
 
