@@ -2,6 +2,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Link, Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { BentoGrid, type BentoItem } from "@/components/ui/bento-grid";
+import { HeroGeometric } from "@/components/ui/shape-landing-hero";
 import {
   Handshake,
   Users,
@@ -129,18 +130,13 @@ export default function Index() {
       </header>
 
       {/* Hero */}
-      <section className="container mx-auto px-4 py-20 md:py-28 text-center">
-        <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/40 px-3 py-1 text-xs font-medium text-muted-foreground mb-6">
-          <Sparkles className="h-3 w-3" /> The all-in-one CRM for modern teams
-        </div>
-        <h1 className="text-4xl md:text-6xl font-bold tracking-tight max-w-3xl mx-auto leading-tight">
-          Close more deals with a CRM your team will actually use
-        </h1>
-        <p className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto">
-          Manage your sales pipeline, contacts and team — all from one beautifully simple workspace.
-          Built for founders, sales teams and growing companies.
-        </p>
-        <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+      <HeroGeometric
+        badge="The all-in-one CRM for modern teams"
+        title1="Close more deals."
+        title2="Run a tighter team."
+        description="Manage your sales pipeline, contacts and team from one beautifully simple workspace. Built for founders, sales teams and growing companies."
+      >
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
           <Button size="lg" asChild>
             <Link to="/signup">
               Start free <ArrowRight className="ml-2 h-4 w-4" />
@@ -150,7 +146,7 @@ export default function Index() {
             <Link to="/login">I already have an account</Link>
           </Button>
         </div>
-      </section>
+      </HeroGeometric>
 
       {/* Features */}
       <section className="container mx-auto px-4 py-16">
