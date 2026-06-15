@@ -158,19 +158,7 @@ export default function Index() {
           <h2 className="text-3xl md:text-4xl font-bold">Everything you need to grow</h2>
           <p className="mt-3 text-muted-foreground">A complete toolkit for your sales workflow.</p>
         </div>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {features.map((f) => (
-            <Card key={f.title} className="transition-colors hover:bg-accent/30">
-              <CardContent className="p-6">
-                <div className="h-10 w-10 rounded-md bg-primary/10 text-primary flex items-center justify-center mb-4">
-                  <f.icon className="h-5 w-5" />
-                </div>
-                <h3 className="font-semibold mb-1">{f.title}</h3>
-                <p className="text-sm text-muted-foreground">{f.description}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <BentoGrid items={bentoFeatures} />
       </section>
 
       {/* Benefits */}
