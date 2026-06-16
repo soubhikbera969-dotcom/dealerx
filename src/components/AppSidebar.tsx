@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, Handshake, LogOut, Sun, Moon, DollarSign, Settings, UserCog } from "lucide-react";
+import { LayoutDashboard, Users, Handshake, LogOut, Sun, Moon, DollarSign, Settings, UserCog, CalendarDays } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -25,6 +25,7 @@ const navItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Contacts", url: "/contacts", icon: Users },
   { title: "Deals", url: "/deals", icon: Handshake },
+  { title: "Planner", url: "/calendar", icon: CalendarDays },
 ];
 
 const adminItems = [

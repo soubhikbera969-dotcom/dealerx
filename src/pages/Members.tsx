@@ -30,6 +30,8 @@ interface Member {
   joined_at: string;
   role: AppRole | null;
   email: string | null;
+  full_name: string | null;
+  avatar_url: string | null;
 }
 
 interface PendingInvite {
@@ -85,7 +87,9 @@ export default function Members() {
       can_view_salary: m.can_view_salary,
       joined_at: m.joined_at,
       role: roleMap.get(m.user_id) || null,
-      email: null,
+      email: m.email ?? null,
+      full_name: m.full_name ?? null,
+      avatar_url: m.avatar_url ?? null,
     }));
 
     setMembers(enriched);

@@ -16,6 +16,7 @@ import Members from "./pages/Members";
 import WorkspaceSettings from "./pages/WorkspaceSettings";
 import AcceptInvite from "./pages/AcceptInvite";
 import NotFound from "./pages/NotFound";
+import CalendarPage from "./pages/Calendar";
 import ScrollToTop from "./components/ScrollToTop";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => (
               <Route path="/contacts" element={<Contacts />} />
               <Route path="/deals" element={<Deals />} />
               <Route path="/members" element={<Members />} />
+              <Route path="/calendar" element={<CalendarPage />} />
               <Route path="/settings/workspace" element={<WorkspaceSettings />} />
               <Route path="/invite/:token" element={<AcceptInvite mode="invite" />} />
               <Route path="/join/:token" element={<AcceptInvite mode="join" />} />
