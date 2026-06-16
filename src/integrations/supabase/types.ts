@@ -14,6 +14,59 @@ export type Database = {
   }
   public: {
     Tables: {
+      calendar_events: {
+        Row: {
+          all_day: boolean
+          color: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          end_at: string
+          id: string
+          location: string | null
+          start_at: string
+          title: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          all_day?: boolean
+          color?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_at: string
+          id?: string
+          location?: string | null
+          start_at: string
+          title: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          all_day?: boolean
+          color?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_at?: string
+          id?: string
+          location?: string | null
+          start_at?: string
+          title?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendar_events_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contacts: {
         Row: {
           company: string | null
@@ -132,6 +185,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
@@ -293,9 +373,12 @@ export type Database = {
     Views: {
       workspace_members_view: {
         Row: {
+          avatar_url: string | null
           can_view_salary: boolean | null
           created_at: string | null
           designation: string | null
+          email: string | null
+          full_name: string | null
           id: string | null
           invited_at: string | null
           joined_at: string | null
@@ -303,30 +386,6 @@ export type Database = {
           salary: number | null
           user_id: string | null
           workspace_id: string | null
-        }
-        Insert: {
-          can_view_salary?: never
-          created_at?: string | null
-          designation?: string | null
-          id?: string | null
-          invited_at?: string | null
-          joined_at?: string | null
-          role?: string | null
-          salary?: never
-          user_id?: string | null
-          workspace_id?: string | null
-        }
-        Update: {
-          can_view_salary?: never
-          created_at?: string | null
-          designation?: string | null
-          id?: string | null
-          invited_at?: string | null
-          joined_at?: string | null
-          role?: string | null
-          salary?: never
-          user_id?: string | null
-          workspace_id?: string | null
         }
         Relationships: [
           {
