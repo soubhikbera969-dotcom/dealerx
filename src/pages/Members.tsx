@@ -289,7 +289,22 @@ export default function Members() {
                   {members.map((m) => (
                     <TableRow key={m.id}>
                       <TableCell className="font-medium">
-                        {m.user_id === user?.id ? "You" : m.user_id.slice(0, 8)}
+                        <div className="flex items-center gap-2">
+                          <div className="h-8 w-8 rounded-full bg-primary/15 text-primary flex items-center justify-center text-xs font-semibold shrink-0">
+                            {(m.full_name || m.email || "?")[0]?.toUpperCase()}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="truncate">
+                              {m.full_name || m.email?.split("@")[0] || m.user_id.slice(0, 8)}
+                              {m.user_id === user?.id && (
+                                <span className="ml-1 text-xs text-muted-foreground">(You)</span>
+                              )}
+                            </div>
+                            {m.email && (
+                              <div className="text-xs text-muted-foreground truncate">{m.email}</div>
+                            )}
+                          </div>
+                        </div>
                       </TableCell>
                       <TableCell>
                         {isAdmin && m.user_id !== user?.id && (m.role !== "super_admin" || isSuperAdmin) ? (
