@@ -28,18 +28,23 @@ export default function WorkspaceSettings() {
     (async () => {
       const { data } = await supabase
         .from("workspaces")
-        .select("name, description, logo_url, invite_token")
+        .select("name, description, logo_url")
         .eq("id", workspaceId)
         .single();
       if (data) {
         setName(data.name);
         setDescription(data.description || "");
         setLogoUrl(data.logo_url);
-        setInviteToken(data.invite_token);
+      }
+      if (isAdmin) {
+        const { data: tok } = await supabase.rpc("get_workspace_invite_token", {
+          _workspace_id: workspaceId,
+        });
+        if (tok) setInviteToken(tok as string);
       }
       setLoading(false);
     })();
-  }, [workspaceId]);
+  }, [workspaceId, isAdmin]);
 
   const handleSave = async () => {
     if (!workspaceId) return;
@@ -84,14 +89,11 @@ export default function WorkspaceSettings() {
   const handleRotateToken = async () => {
     if (!workspaceId) return;
     if (!confirm("Rotate invite link? The old link will stop working.")) return;
-    const { data, error } = await supabase
-      .from("workspaces")
-      .update({ invite_token: crypto.randomUUID() })
-      .eq("id", workspaceId)
-      .select("invite_token")
-      .single();
+    const { data, error } = await supabase.rpc("rotate_workspace_invite_token", {
+      _workspace_id: workspaceId,
+    });
     if (error) return toast.error(error.message);
-    setInviteToken(data.invite_token);
+    setInviteToken(data as string);
     toast.success("Invite link rotated");
   };
 

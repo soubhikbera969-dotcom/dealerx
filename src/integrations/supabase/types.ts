@@ -350,6 +350,10 @@ export type Database = {
           workspace_name: string
         }[]
       }
+      get_workspace_invite_token: {
+        Args: { _workspace_id: string }
+        Returns: string
+      }
       has_workspace_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -365,6 +369,10 @@ export type Database = {
         Returns: boolean
       }
       join_workspace_by_token: { Args: { _token: string }; Returns: string }
+      rotate_workspace_invite_token: {
+        Args: { _workspace_id: string }
+        Returns: string
+      }
     }
     Enums: {
       app_role: "super_admin" | "admin" | "manager" | "employee" | "intern"
