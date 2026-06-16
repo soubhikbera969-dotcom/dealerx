@@ -33,11 +33,9 @@ export default function TubesCursor({
 
   useEffect(() => {
     const initTimer = setTimeout(() => {
-      import(
-        /* @vite-ignore */
-        "https://cdn.jsdelivr.net/npm/threejs-components@0.0.19/build/cursors/tubes1.min.js"
-      )
-        .then((module: { default: (canvas: HTMLCanvasElement, opts: unknown) => TubesInstance }) => {
+      const url = "https://cdn.jsdelivr.net/npm/threejs-components@0.0.19/build/cursors/tubes1.min.js";
+      (import(/* @vite-ignore */ url) as Promise<{ default: (canvas: HTMLCanvasElement, opts: unknown) => TubesInstance }>)
+        .then((module) => {
           if (!canvasRef.current) return;
           appRef.current = module.default(canvasRef.current, {
             tubes: {
