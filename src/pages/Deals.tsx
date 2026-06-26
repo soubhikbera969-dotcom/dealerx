@@ -279,3 +279,107 @@ export default function Deals() {
     </DashboardLayout>
   );
 }
+
+function DealColumn({
+  status,
+  label,
+  color,
+  isDragging,
+  children,
+}: {
+  status: DealStatus;
+  label: string;
+  color: string;
+  isDragging: boolean;
+  children: React.ReactNode;
+}) {
+  const { setNodeRef, isOver } = useDroppable({ id: status });
+  return (
+    <div
+      ref={setNodeRef}
+      aria-label={label}
+      className={`rounded-xl border-2 border-dashed p-4 min-h-[300px] transition-colors ${color} ${
+        isDragging ? "border-primary/50" : ""
+      } ${isOver ? "ring-2 ring-primary/60 bg-primary/5" : ""}`}
+    >
+      {children}
+    </div>
+  );
+}
+
+function DealCard({
+  deal,
+  contactName,
+  formatValue,
+  onEdit,
+  onHistory,
+  onDelete,
+}: {
+  deal: Deal;
+  contactName: string | null;
+  formatValue: (v: number) => string;
+  onEdit: (deal: Deal) => void;
+  onHistory: (deal: Deal) => void;
+  onDelete: (deal: Deal) => void;
+}) {
+  const { setNodeRef, listeners, attributes, isDragging } = useDraggable({ id: deal.id });
+  return (
+    <Card
+      ref={setNodeRef}
+      className={`glass-card hover:shadow-lg transition-all hover:-translate-y-0.5 group ${
+        isDragging ? "opacity-40" : ""
+      }`}
+    >
+      <CardContent className="p-3">
+        <div className="flex items-start gap-2">
+          <button
+            type="button"
+            aria-label="Drag to move"
+            {...listeners}
+            {...attributes}
+            className="touch-none cursor-grab active:cursor-grabbing p-1 -m-1 text-muted-foreground hover:text-foreground"
+          >
+            <GripVertical className="h-4 w-4" />
+          </button>
+          <div className="min-w-0 flex-1">
+            <p className="font-medium text-sm text-foreground truncate">{deal.title}</p>
+            {contactName && <p className="text-xs text-muted-foreground mt-1">{contactName}</p>}
+            {deal.value && (
+              <p className="text-xs font-semibold text-primary mt-1">{formatValue(Number(deal.value))}</p>
+            )}
+            <p className="text-[10px] text-muted-foreground/60 mt-1">
+              Created: {format(new Date(deal.created_at), "MMM d, yyyy h:mm a")}
+            </p>
+            {deal.updated_at !== deal.created_at && (
+              <p className="text-[10px] text-muted-foreground/60">
+                Modified: {format(new Date(deal.updated_at), "MMM d, yyyy h:mm a")}
+              </p>
+            )}
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity shrink-0"
+              >
+                <MoreVertical className="h-3.5 w-3.5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => onEdit(deal)}>
+                <Pencil className="h-3.5 w-3.5 mr-2" /> Edit
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onHistory(deal)}>
+                <History className="h-3.5 w-3.5 mr-2" /> History
+              </DropdownMenuItem>
+              <DropdownMenuItem className="text-destructive" onClick={() => onDelete(deal)}>
+                <Trash2 className="h-3.5 w-3.5 mr-2" /> Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
