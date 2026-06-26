@@ -122,15 +122,30 @@ export default function Deals() {
     else { toast.success("Deal deleted"); setDeleteConfirm(null); fetchData(); }
   };
 
-  const handleDrop = async (status: DealStatus) => {
-    if (!dragDeal || dragDeal.status === status) return;
-    const { error } = await supabase.from("deals").update({ status }).eq("id", dragDeal.id);
+  const sensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } }),
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+  );
+
+  const handleDragStart = (event: DragStartEvent) => {
+    const deal = deals.find((d) => d.id === event.active.id);
+    if (deal) setDragDeal(deal);
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    setDragDeal(null);
+    if (!over) return;
+    const deal = deals.find((d) => d.id === active.id);
+    const targetStatus = over.id as DealStatus;
+    if (!deal || deal.status === targetStatus) return;
+    const { error } = await supabase.from("deals").update({ status: targetStatus }).eq("id", deal.id);
     if (error) toast.error(error.message);
     else {
-      setDeals((prev) => prev.map((d) => (d.id === dragDeal.id ? { ...d, status } : d)));
-      toast.success(`Moved to ${COLUMNS.find((c) => c.status === status)?.label}`);
+      setDeals((prev) => prev.map((d) => (d.id === deal.id ? { ...d, status: targetStatus } : d)));
+      toast.success(`Moved to ${COLUMNS.find((c) => c.status === targetStatus)?.label}`);
     }
-    setDragDeal(null);
   };
 
   const getContactName = (id: string | null) => {
