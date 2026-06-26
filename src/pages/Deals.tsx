@@ -13,6 +13,19 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { toast } from "sonner";
 import { Plus, GripVertical, MoreVertical, Pencil, Trash2, History } from "lucide-react";
 import { format } from "date-fns";
+import {
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  TouchSensor,
+  MouseSensor,
+  useSensor,
+  useSensors,
+  useDraggable,
+  useDroppable,
+  type DragEndEvent,
+  type DragStartEvent,
+} from "@dnd-kit/core";
 import { DealHistoryDialog } from "@/components/DealHistoryDialog";
 import type { Tables, Database } from "@/integrations/supabase/types";
 
@@ -109,15 +122,30 @@ export default function Deals() {
     else { toast.success("Deal deleted"); setDeleteConfirm(null); fetchData(); }
   };
 
-  const handleDrop = async (status: DealStatus) => {
-    if (!dragDeal || dragDeal.status === status) return;
-    const { error } = await supabase.from("deals").update({ status }).eq("id", dragDeal.id);
+  const sensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } }),
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+  );
+
+  const handleDragStart = (event: DragStartEvent) => {
+    const deal = deals.find((d) => d.id === event.active.id);
+    if (deal) setDragDeal(deal);
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    setDragDeal(null);
+    if (!over) return;
+    const deal = deals.find((d) => d.id === active.id);
+    const targetStatus = over.id as DealStatus;
+    if (!deal || deal.status === targetStatus) return;
+    const { error } = await supabase.from("deals").update({ status: targetStatus }).eq("id", deal.id);
     if (error) toast.error(error.message);
     else {
-      setDeals((prev) => prev.map((d) => (d.id === dragDeal.id ? { ...d, status } : d)));
-      toast.success(`Moved to ${COLUMNS.find((c) => c.status === status)?.label}`);
+      setDeals((prev) => prev.map((d) => (d.id === deal.id ? { ...d, status: targetStatus } : d)));
+      toast.success(`Moved to ${COLUMNS.find((c) => c.status === targetStatus)?.label}`);
     }
-    setDragDeal(null);
   };
 
   const getContactName = (id: string | null) => {
@@ -171,77 +199,51 @@ export default function Deals() {
           </Dialog>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {COLUMNS.map((col) => (
-            <div
-              key={col.status}
-              className={`rounded-xl border-2 border-dashed p-4 min-h-[300px] transition-colors ${col.color} ${dragDeal ? "border-primary/50" : ""}`}
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={() => handleDrop(col.status)}
-            >
-              <h3 className="font-semibold text-sm text-foreground mb-3 uppercase tracking-wider">
-                {col.label}
-                <span className="ml-2 text-muted-foreground">
-                  ({deals.filter((d) => d.status === col.status).length})
-                </span>
-              </h3>
-              <div className="space-y-2">
-                {deals
-                  .filter((d) => d.status === col.status)
-                  .map((deal) => (
-                    <Card
-                      key={deal.id}
-                      draggable
-                      onDragStart={() => setDragDeal(deal)}
-                      onDragEnd={() => setDragDeal(null)}
-                      className="cursor-grab active:cursor-grabbing glass-card hover:shadow-lg transition-all hover:-translate-y-0.5 group"
-                    >
-                      <CardContent className="p-3">
-                        <div className="flex items-start gap-2">
-                          <GripVertical className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-                          <div className="min-w-0 flex-1">
-                            <p className="font-medium text-sm text-foreground truncate">{deal.title}</p>
-                            {getContactName(deal.contact_id) && (
-                              <p className="text-xs text-muted-foreground mt-1">{getContactName(deal.contact_id)}</p>
-                            )}
-                            {deal.value && (
-                              <p className="text-xs font-semibold text-primary mt-1">{formatValue(Number(deal.value))}</p>
-                            )}
-                            <p className="text-[10px] text-muted-foreground/60 mt-1">
-                              Created: {format(new Date(deal.created_at), "MMM d, yyyy h:mm a")}
-                            </p>
-                            {deal.updated_at !== deal.created_at && (
-                              <p className="text-[10px] text-muted-foreground/60">
-                                Modified: {format(new Date(deal.updated_at), "MMM d, yyyy h:mm a")}
-                              </p>
-                            )}
-                          </div>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                                <MoreVertical className="h-3.5 w-3.5" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => openEdit(deal)}>
-                                <Pencil className="h-3.5 w-3.5 mr-2" /> Edit
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => setHistoryDeal(deal)}>
-                                <History className="h-3.5 w-3.5 mr-2" /> History
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="text-destructive" onClick={() => setDeleteConfirm(deal)}>
-                                <Trash2 className="h-3.5 w-3.5 mr-2" /> Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-              </div>
-            </div>
-          ))}
-        </div>
+        <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDragCancel={() => setDragDeal(null)}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {COLUMNS.map((col) => {
+              const colDeals = deals.filter((d) => d.status === col.status);
+              return (
+                <DealColumn key={col.status} status={col.status} label={col.label} color={col.color} isDragging={!!dragDeal}>
+                  <h3 className="font-semibold text-sm text-foreground mb-3 uppercase tracking-wider">
+                    {col.label}
+                    <span className="ml-2 text-muted-foreground">({colDeals.length})</span>
+                  </h3>
+                  <div className="space-y-2">
+                    {colDeals.map((deal) => (
+                      <DealCard
+                        key={deal.id}
+                        deal={deal}
+                        contactName={getContactName(deal.contact_id)}
+                        formatValue={formatValue}
+                        onEdit={openEdit}
+                        onHistory={setHistoryDeal}
+                        onDelete={setDeleteConfirm}
+                      />
+                    ))}
+                  </div>
+                </DealColumn>
+              );
+            })}
+          </div>
+          <DragOverlay>
+            {dragDeal ? (
+              <Card className="glass-card shadow-2xl rotate-2 cursor-grabbing">
+                <CardContent className="p-3">
+                  <div className="flex items-start gap-2">
+                    <GripVertical className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-sm text-foreground truncate">{dragDeal.title}</p>
+                      {dragDeal.value && (
+                        <p className="text-xs font-semibold text-primary mt-1">{formatValue(Number(dragDeal.value))}</p>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : null}
+          </DragOverlay>
+        </DndContext>
 
         {/* Edit Dialog */}
         <Dialog open={editDialogOpen} onOpenChange={(open) => { setEditDialogOpen(open); if (!open) { setEditDeal(null); resetForm(); } }}>
@@ -275,5 +277,109 @@ export default function Deals() {
         )}
       </div>
     </DashboardLayout>
+  );
+}
+
+function DealColumn({
+  status,
+  label,
+  color,
+  isDragging,
+  children,
+}: {
+  status: DealStatus;
+  label: string;
+  color: string;
+  isDragging: boolean;
+  children: React.ReactNode;
+}) {
+  const { setNodeRef, isOver } = useDroppable({ id: status });
+  return (
+    <div
+      ref={setNodeRef}
+      aria-label={label}
+      className={`rounded-xl border-2 border-dashed p-4 min-h-[300px] transition-colors ${color} ${
+        isDragging ? "border-primary/50" : ""
+      } ${isOver ? "ring-2 ring-primary/60 bg-primary/5" : ""}`}
+    >
+      {children}
+    </div>
+  );
+}
+
+function DealCard({
+  deal,
+  contactName,
+  formatValue,
+  onEdit,
+  onHistory,
+  onDelete,
+}: {
+  deal: Deal;
+  contactName: string | null;
+  formatValue: (v: number) => string;
+  onEdit: (deal: Deal) => void;
+  onHistory: (deal: Deal) => void;
+  onDelete: (deal: Deal) => void;
+}) {
+  const { setNodeRef, listeners, attributes, isDragging } = useDraggable({ id: deal.id });
+  return (
+    <Card
+      ref={setNodeRef}
+      className={`glass-card hover:shadow-lg transition-all hover:-translate-y-0.5 group ${
+        isDragging ? "opacity-40" : ""
+      }`}
+    >
+      <CardContent className="p-3">
+        <div className="flex items-start gap-2">
+          <button
+            type="button"
+            aria-label="Drag to move"
+            {...listeners}
+            {...attributes}
+            className="touch-none cursor-grab active:cursor-grabbing p-1 -m-1 text-muted-foreground hover:text-foreground"
+          >
+            <GripVertical className="h-4 w-4" />
+          </button>
+          <div className="min-w-0 flex-1">
+            <p className="font-medium text-sm text-foreground truncate">{deal.title}</p>
+            {contactName && <p className="text-xs text-muted-foreground mt-1">{contactName}</p>}
+            {deal.value && (
+              <p className="text-xs font-semibold text-primary mt-1">{formatValue(Number(deal.value))}</p>
+            )}
+            <p className="text-[10px] text-muted-foreground/60 mt-1">
+              Created: {format(new Date(deal.created_at), "MMM d, yyyy h:mm a")}
+            </p>
+            {deal.updated_at !== deal.created_at && (
+              <p className="text-[10px] text-muted-foreground/60">
+                Modified: {format(new Date(deal.updated_at), "MMM d, yyyy h:mm a")}
+              </p>
+            )}
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity shrink-0"
+              >
+                <MoreVertical className="h-3.5 w-3.5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => onEdit(deal)}>
+                <Pencil className="h-3.5 w-3.5 mr-2" /> Edit
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onHistory(deal)}>
+                <History className="h-3.5 w-3.5 mr-2" /> History
+              </DropdownMenuItem>
+              <DropdownMenuItem className="text-destructive" onClick={() => onDelete(deal)}>
+                <Trash2 className="h-3.5 w-3.5 mr-2" /> Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
