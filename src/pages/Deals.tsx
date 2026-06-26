@@ -13,6 +13,19 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { toast } from "sonner";
 import { Plus, GripVertical, MoreVertical, Pencil, Trash2, History } from "lucide-react";
 import { format } from "date-fns";
+import {
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  TouchSensor,
+  MouseSensor,
+  useSensor,
+  useSensors,
+  useDraggable,
+  useDroppable,
+  type DragEndEvent,
+  type DragStartEvent,
+} from "@dnd-kit/core";
 import { DealHistoryDialog } from "@/components/DealHistoryDialog";
 import type { Tables, Database } from "@/integrations/supabase/types";
 
